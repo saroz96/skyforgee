@@ -64,7 +64,7 @@ export const AuthProvider = ({ children }) => {
       setLoading(true);
       setError(null);
 
-      const { data } = await axios.get(`/api/switch/${companyId}`, {
+      const { data } = await api.get(`/api/switch/${companyId}`, {
         withCredentials: true
       });
 
@@ -93,7 +93,7 @@ export const AuthProvider = ({ children }) => {
       setLoading(true);
       setError(null);
 
-      const { data } = await axios.post('/api/auth/register', userData);
+      const { data } = await api.post('/api/auth/register', userData);
 
       if (options.autoLogin && data.token) {
         localStorage.setItem('token', data.token);
@@ -115,7 +115,7 @@ export const AuthProvider = ({ children }) => {
 
   const validateToken = async (token) => {
     try {
-      const { data } = await axios.get('/api/auth/me', {
+      const { data } = await api.get('/api/auth/me', {
         headers: { Authorization: `Bearer ${token}` }
       });
       dispatch(setCredentials({
@@ -134,7 +134,7 @@ export const AuthProvider = ({ children }) => {
       setLoading(true);
       setError(null);
 
-      const { data } = await axios.post('/api/auth/login', credentials, {
+      const { data } = await api.post('/api/auth/login', credentials, {
         withCredentials: true
       });
 
@@ -159,7 +159,7 @@ export const AuthProvider = ({ children }) => {
   const logout = useCallback(async () => {
     try {
       setLoading(true);
-      await axios.post('/api/auth/logout', {}, {
+      await api.post('/api/auth/logout', {}, {
         withCredentials: true
       });
 
