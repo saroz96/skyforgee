@@ -13,7 +13,7 @@ const MongoStore = require('connect-mongo');
 const path = require('path');
 const app = express();
 
-// const __dirname = path();
+const __dirname = path.resolve();
 
 // Import routes
 const userRoutes = require('./routes/users');
@@ -114,10 +114,9 @@ app.use((req, res, next) => {
 
 // Serve static files from the React app
 app.use(express.static(path.join(__dirname, 'frontend/build')));
-
-app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'frontend/build', 'index.html'));
-});
+// app.get('*', (req, res) => {
+//     res.sendFile(path.join(__dirname, 'frontend/build', 'index.html'));
+// });
 
 // Routes
 app.use('/api/auth', userRoutes);
