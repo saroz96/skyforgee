@@ -26,13 +26,13 @@ module.exports = {
                 return req.logout(err => {
                     if (err) return next(err);
                     req.flash('error', 'Your account has been deactivated. Please contact the admin.');
-                    return res.redirect('/login');
+                    return res.redirect('/api/auth/login');
                 });
             }
             return next();
         }
         req.flash('error', 'Please log in to view that resource');
-        res.redirect('/login');
+        res.redirect('/api/auth/login');
     },
 
     // Middleware to forward authenticated users away from auth pages
