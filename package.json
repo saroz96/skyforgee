@@ -1,17 +1,20 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "main": "app.js",
+  "main": "backend/app.js",
   "scripts": {
     "dev": "nodemon backend/app.js",
     "build": "npm install && npm install --prefix frontend && npm run build --prefix frontend",
     "start": "node backend/app.js",
+    "prod": "NODE_ENV=production node backend/app.js",
+    "frontend": "set PORT=3000&& npm start --prefix frontend",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
+  "type": "commonjs",
   "dependencies": {
     "bcryptjs": "^3.0.2",
     "bwip-js": "^4.7.0",

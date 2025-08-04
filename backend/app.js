@@ -13,7 +13,7 @@ const MongoStore = require('connect-mongo');
 const path = require('path');
 const app = express();
 
-const __dirname = path.resolve();
+// const __dirname = path.resolve();
 
 // Import routes
 const userRoutes = require('./routes/users');
