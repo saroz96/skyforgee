@@ -51,9 +51,10 @@ db.once("open", () => {
 // Middleware
 app.use(cors({
     origin: 'https://skyforge-sandy.vercel.app',
+    origin: 'https://skyforgee.onrender.com',
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+    // methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    // allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 app.use(express.json());
