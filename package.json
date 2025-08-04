@@ -12,6 +12,7 @@
   "author": "",
   "license": "ISC",
   "description": "",
+  "type": "module",
   "dependencies": {
     "bcryptjs": "^3.0.2",
     "bwip-js": "^4.7.0",
@@ -32,5 +33,5 @@
     "passport-local": "^1.0.0",
     "read-excel-file": "^5.8.8",
     "uuid": "^11.1.0"
-  }
+  },
 }
