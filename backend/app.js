@@ -13,7 +13,7 @@ const MongoStore = require('connect-mongo');
 const path = require('path');
 const app = express();
 
-// const __dirname = path.resolve();
+const _dirname = path.resolve();
 
 // Import routes
 const userRoutes = require('./routes/users');
@@ -50,7 +50,7 @@ db.once("open", () => {
 
 // Middleware
 app.use(cors({
-    origin: 'http://localhost:3000',
+    origin: 'https://skyforge-sandy.vercel.app/',
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
@@ -112,12 +112,6 @@ app.use((req, res, next) => {
     next();
 });
 
-// Serve static files from the React app
-app.use(express.static(path.join(__dirname, 'frontend/build')));
-// app.get('*', (req, res) => {
-//     res.sendFile(path.join(__dirname, 'frontend/build', 'index.html'));
-// });
-
 // Routes
 app.use('/api/auth', userRoutes);
 app.use('/api', companyRoutes);
@@ -140,20 +134,9 @@ app.use('/api/retailer', paymentRoutes);
 app.use('/api/retailer', receiptRoutes);
 app.use('/api/retailer', stockAdjustmentRoutes);
 
-// ⚠️ Temporary: Comment this out until `frontend/build` exists
-// app.get('*', (req, res) => {
-//     res.sendFile(path.resolve(_dirname, 'frontend', 'build', 'index.html'));
-// });
 
-// Handle React routing, return all requests to React app
-// app.get('*', (req, res) => {
-//     res.sendFile(path.join(_dirname, 'frontend/build', 'index.html'));
-// });
-
-// // Add this before your other routes
-// app.get('/select-company', (req, res) => {
-//     res.redirect('http://localhost:3000/select-company');
-// });
+// Serve static files from the React app
+app.use(express.static(path.join(_dirname, 'frontend/build')));
 
 app.get('/', (req, res) => {
     res.send('Backend is running');
