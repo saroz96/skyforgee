@@ -11,9 +11,11 @@ const initializePassport = require('./config/passport-config');
 
 const MongoStore = require('connect-mongo');
 const path = require('path');
+
+const PORT = process.env.PORT || 5000;
 const app = express();
 
-const _dirname = path.resolve();
+// const _dirname = path.resolve();
 
 // Import routes
 const userRoutes = require('./routes/users');
@@ -50,10 +52,10 @@ db.once("open", () => {
 
 // Middleware
 app.use(cors({
-    origin: 'https://skyforgee-frontend.onrender.com',
+    origin: 'http://localhost:3000',
     credentials: true,
-    // methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    // allowedHeaders: ['Content-Type', 'Authorization']
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 app.use(express.json());
@@ -136,13 +138,12 @@ app.use('/api/retailer', stockAdjustmentRoutes);
 
 
 // Serve static files from the React app
-app.use(express.static(path.join(_dirname, 'frontend/build')));
+// app.use(express.static(path.join(_dirname, 'frontend/build')));
 
 app.get('/', (req, res) => {
     res.send('Backend is running');
 });
 
-const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 })
