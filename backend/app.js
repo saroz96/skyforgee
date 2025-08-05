@@ -7,36 +7,35 @@ const flash = require('connect-flash');
 const methodOverride = require('method-override');
 const cors = require('cors');
 const passport = require('passport');
-const path = require('path');
 const initializePassport = require('./config/passport-config');
+const path = require('path');
 
-// Initialize Express app
-const app = express();
 const PORT = process.env.PORT || 5000;
+const app = express();
 
-// Database Connection
-const connectDB = async () => {
-  try {
-    await mongoose.connect(process.env.MONGO_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      serverSelectionTimeoutMS: 5000,
-      socketTimeoutMS: 45000,
-    });
-    console.log('MongoDB connected successfully');
-  } catch (err) {
-    console.error('MongoDB connection error:', err);
-    process.exit(1);
-  }
-};
-connectDB();
+// Initialize Passport
+initializePassport(passport);
+
+// Database Connection with improved error handling
+const mongoUri = process.env.MONGO_URI;
+
+mongoose.connect(mongoUri, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  serverSelectionTimeoutMS: 5000,
+  socketTimeoutMS: 30000
+})
+.then(() => console.log("Database connected"))
+.catch(err => {
+  console.error("Database connection error:", err);
+  process.exit(1);
+});
+
+const db = mongoose.connection;
+db.on("error", console.error.bind(console, "MongoDB connection error:"));
+db.once("open", () => console.log("Database connected"));
 
 // Middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(methodOverride('_method'));
-
-// CORS Configuration
 app.use(cors({
   origin: process.env.FRONTEND_URL || 'http://localhost:3000',
   credentials: true,
@@ -44,16 +43,23 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-// Session Configuration
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(methodOverride('_method'));
+
+// Session Configuration - Fixed duplicate and incorrect setup
 const sessionStore = MongoStore.create({
-  mongoUrl: process.env.MONGO_URI,
+  mongoUrl: mongoUri,
   collectionName: 'sessions',
   ttl: 14 * 24 * 60 * 60, // 14 days
-  autoRemove: 'native'
+  autoRemove: 'native',
+  crypto: {
+    secret: process.env.SESSION_SECRET || 'fallback-secret-key'
+  }
 });
 
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'fallback-secret-key',
+  secret: process.env.SESSION_SECRET || 'your-secret-key',
   resave: false,
   saveUninitialized: false,
   store: sessionStore,
@@ -65,21 +71,19 @@ app.use(session({
   }
 }));
 
-// Passport Configuration
-initializePassport(passport);
+app.use(flash());
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Flash Messages
-app.use(flash());
+// Flash middleware
 app.use((req, res, next) => {
   res.locals.user = req.user;
-  res.locals.success = req.flash('success');
+  res.locals.messages = req.flash('success');
   res.locals.error = req.flash('error');
   next();
 });
 
-// Route Imports
+// Import routes
 const userRoutes = require('./routes/users');
 const companyRoutes = require('./routes/company');
 const itemRoutes = require('./routes/retailer/items');
@@ -102,6 +106,8 @@ const stockAdjustmentRoutes = require('./routes/retailer/stockAdjustments');
 // Routes
 app.use('/api/auth', userRoutes);
 app.use('/api', companyRoutes);
+
+// Retailer routes
 app.use('/api/retailer', itemRoutes);
 app.use('/api/retailer', categoryRoutes);
 app.use('/api/retailer', itemsCompanyRoutes);
@@ -119,34 +125,29 @@ app.use('/api/retailer', paymentRoutes);
 app.use('/api/retailer', receiptRoutes);
 app.use('/api/retailer', stockAdjustmentRoutes);
 
-// Health Check
-app.get('/', (req, res) => {
+// Health check endpoint
+app.get('/api/health', (req, res) => {
   res.status(200).json({
-    status: 'success',
-    message: 'Backend is running',
+    status: 'healthy',
+    database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
     timestamp: new Date().toISOString()
   });
 });
 
-// Error Handling Middleware
+// Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({
-    status: 'error',
-    message: 'Internal Server Error',
-    error: process.env.NODE_ENV === 'development' ? err.message : undefined
+    error: 'Internal Server Error',
+    message: process.env.NODE_ENV === 'development' ? err.message : undefined
   });
 });
 
-// Start Server
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
-});
+// For Vercel deployment
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+  });
+}
 
-// Handle unhandled promise rejections
-process.on('unhandledRejection', (err) => {
-  console.error('Unhandled Rejection:', err);
-  // Close server and exit process
-  server.close(() => process.exit(1));
-});
+module.exports = app; // For Vercel serverless functions
